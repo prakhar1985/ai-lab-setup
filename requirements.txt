@@ -1,0 +1,7 @@
+jupyterlab
+pandas
+scikit-learn
+torch
+transformers
+matplotlib
+ipywidgets
