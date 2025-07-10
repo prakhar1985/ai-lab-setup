@@ -1,0 +1,42 @@
+---
+- name: Setup AI Dev Environment with Jupyter
+  hosts: localhost
+  become: yes
+
+  vars:
+    venv_path: /home/{{ ansible_user }}/first-ai
+
+  tasks:
+    - name: Install system dependencies
+      dnf:
+        name:
+          - python3
+          - python3-pip
+          - git
+        state: present
+
+    - name: Upgrade pip
+      pip:
+        name: pip
+        executable: pip3
+        state: latest
+
+    - name: Install virtualenv
+      pip:
+        name: virtualenv
+        executable: pip3
+
+    - name: Create Python virtualenv
+      command: python3 -m venv {{ venv_path }}
+      args:
+        creates: "{{ venv_path }}/bin/activate"
+
+    - name: Install Python packages from requirements.txt
+      pip:
+        requirements: /home/{{ ansible_user }}/ai-lab-setup/requirements.txt
+        virtualenv: "{{ venv_path }}"
+
+    - name: Register Jupyter kernel with virtualenv
+      command: "{{ venv_path }}/bin/python -m ipykernel install --user --name=first-ai --display-name='Python (first-ai)'"
+      args:
+        creates: "~/.local/share/jupyter/kernels/first-ai"
