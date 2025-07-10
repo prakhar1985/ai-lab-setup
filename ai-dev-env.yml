@@ -1,13 +1,15 @@
 ---
-- name: Setup AI Dev Environment with Jupyter
+- name: Setup AI Dev Environment with Jupyter + MiniLM
   hosts: localhost
-  become: yes
 
   vars:
     venv_path: /home/{{ ansible_user }}/first-ai
+    req_file: /home/{{ ansible_user }}/ai-lab-setup/requirements.txt
 
   tasks:
+
     - name: Install system dependencies
+      become: yes
       dnf:
         name:
           - python3
@@ -15,13 +17,13 @@
           - git
         state: present
 
-    - name: Upgrade pip
+    - name: Upgrade pip (system level)
       pip:
         name: pip
         executable: pip3
         state: latest
 
-    - name: Install virtualenv
+    - name: Install virtualenv (system-wide)
       pip:
         name: virtualenv
         executable: pip3
@@ -31,12 +33,22 @@
       args:
         creates: "{{ venv_path }}/bin/activate"
 
-    - name: Install Python packages from requirements.txt
-      pip:
-        requirements: /home/{{ ansible_user }}/ai-lab-setup/requirements.txt
-        virtualenv: "{{ venv_path }}"
+    - name: Install Python packages using pip inside virtualenv
+      command: "{{ venv_path }}/bin/pip install -r {{ req_file }}"
+      register: pip_output
+      ignore_errors: false
+
+    - debug:
+        var: pip_output.stdout_lines
 
     - name: Register Jupyter kernel with virtualenv
       command: "{{ venv_path }}/bin/python -m ipykernel install --user --name=first-ai --display-name='Python (first-ai)'"
       args:
         creates: "~/.local/share/jupyter/kernels/first-ai"
+
+    - name: Optional - Clone workshop repo
+      git:
+        repo: "https://github.com/YOUR_USERNAME/movie-recommender.git"
+        dest: /home/{{ ansible_user }}/movie-recommender
+        clone: yes
+        update: yes
