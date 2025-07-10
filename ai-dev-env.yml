@@ -2,7 +2,6 @@
 - name: Setup user-only AI dev environment with virtualenv
   hosts: localhost
   connection: local
-  gather_facts: no
 
   vars:
     venv_path: "{{ ansible_env.HOME }}/first-ai"
