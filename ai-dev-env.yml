@@ -1,54 +1,41 @@
 ---
-- name: Setup AI Dev Environment with Jupyter + MiniLM
+- name: Setup user-only AI dev environment with virtualenv
   hosts: localhost
+  connection: local
+  gather_facts: no
 
   vars:
-    venv_path: /home/{{ ansible_user }}/first-ai
-    req_file: /home/{{ ansible_user }}/ai-lab-setup/requirements.txt
+    venv_path: "{{ ansible_env.HOME }}/first-ai"
 
   tasks:
 
-    - name: Install system dependencies
-      become: yes
-      dnf:
-        name:
-          - python3
-          - python3-pip
-          - git
-        state: present
+    - name: Ensure ~/.local/bin is in PATH
+      shell: echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc
+      args:
+        executable: /bin/bash
 
-    - name: Upgrade pip (system level)
-      pip:
-        name: pip
-        executable: pip3
-        state: latest
+    - name: Upgrade pip (user-only)
+      shell: python3 -m pip install --user --upgrade pip
 
-    - name: Install virtualenv (system-wide)
-      pip:
-        name: virtualenv
-        executable: pip3
+    - name: Install virtualenv (user-only)
+      shell: python3 -m pip install --user virtualenv
 
-    - name: Create Python virtualenv
-      command: python3 -m venv {{ venv_path }}
+    - name: Create virtualenv in user directory
+      command: python3 -m virtualenv "{{ venv_path }}"
       args:
         creates: "{{ venv_path }}/bin/activate"
 
-    - name: Install Python packages using pip inside virtualenv
-      command: "{{ venv_path }}/bin/pip install -r {{ req_file }}"
-      register: pip_output
-      ignore_errors: false
+    - name: Install pandas and scikit-learn in virtualenv
+      command: "{{ venv_path }}/bin/pip install pandas scikit-learn"
 
-    - debug:
-        var: pip_output.stdout_lines
+    - name: Install JupyterLab and common packages
+      command: "{{ venv_path }}/bin/pip install jupyterlab ipywidgets matplotlib"
 
-    - name: Register Jupyter kernel with virtualenv
+    - name: Install PyTorch (CPU only)
+      command: "{{ venv_path }}/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu"
+
+    - name: Install Hugging Face Transformers
+      command: "{{ venv_path }}/bin/pip install transformers"
+
+    - name: Register Jupyter kernel for virtualenv
       command: "{{ venv_path }}/bin/python -m ipykernel install --user --name=first-ai --display-name='Python (first-ai)'"
-      args:
-        creates: "~/.local/share/jupyter/kernels/first-ai"
-
-    - name: Optional - Clone workshop repo
-      git:
-        repo: "https://github.com/YOUR_USERNAME/movie-recommender.git"
-        dest: /home/{{ ansible_user }}/movie-recommender
-        clone: yes
-        update: yes
