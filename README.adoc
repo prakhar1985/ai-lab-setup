@@ -1,0 +1,96 @@
+= 🤖 AI Lab Environment Setup with Ansible
+:toc:
+:toclevels: 2
+:icons: font
+
+This project automates the setup of a Python-based AI development environment on RHEL 9 using Ansible. It installs all necessary packages, sets up a virtual environment, registers a Jupyter kernel, and prepares you to start working with AI models.
+
+== 🔧 What's Included
+
+* A Python virtual environment named `first-ai`
+* Installed libraries:
+  ** `torch`, `transformers`, `scikit-learn`, `pandas`, `matplotlib`, `ipywidgets`
+* JupyterLab for running notebooks
+* Optional: clone a GitHub repo (like your movie recommender workshop)
+
+== 📋 Prerequisites
+
+* RHEL 9 (or compatible OS)
+* `ansible` installed (`dnf install ansible`)
+* Internet access (for downloading models and Python packages)
+* Git installed (`dnf install git`)
+
+== 🚀 Setup Instructions
+
+=== 1. Clone this Repository
+
+[source, bash]
+----
+git clone https://github.com/YOUR_USERNAME/ai-lab-setup.git
+cd ai-lab-setup
+----
+
+=== 2. Run the Ansible Playbook
+
+[source, bash]
+----
+ansible-playbook ai-dev-env.yml -c local
+----
+
+This will:
+* Install system dependencies
+* Create a Python virtual environment (`~/first-ai`)
+* Install packages from `requirements.txt`
+* Register a Jupyter kernel for use in notebooks
+
+=== 3. Activate the Virtual Environment
+
+[source, bash]
+----
+source ~/first-ai/bin/activate
+----
+
+=== 4. Launch JupyterLab
+
+[source, bash]
+----
+jupyter lab
+----
+
+Open the URL printed in your terminal (e.g., `http://localhost:8888`) *inside your VNC session's browser*.
+
+Select the kernel: `Python (first-ai)`
+
+== 📁 Project Structure
+
+[source, text]
+----
+ai-lab-setup/
+├── ai-dev-env.yml          # Ansible playbook
+├── requirements.txt        # Python dependencies
+└── README.adoc             # This guide
+----
+
+== ✏️ Customize
+
+* Add/remove Python packages in `requirements.txt`
+* Change the virtualenv name in `ai-dev-env.yml`
+* Update the Git repo URL to clone a different project
+
+== 💬 Example Requirements
+
+.requirements.txt
+[source, text]
+----
+jupyterlab
+pandas
+scikit-learn
+torch
+transformers
+matplotlib
+ipywidgets
+----
+
+== 🙋‍♂️ Questions or Contributions?
+
+Fork the repo, open issues, or submit PRs to improve. Happy automating and experimenting!
